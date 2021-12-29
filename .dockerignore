@@ -1,0 +1,14 @@
+# folders
+.git
+.gitignore
+.vs
+.vscode
+packages
+Wiki
+**/bin/
+**/obj/
+**/out/
+
+# files
+*Dockerfile
+**/*.md

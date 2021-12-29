@@ -1,0 +1,63 @@
+bin
+obj
+applicationhost.config
+/Wipfli/App_Config/ConnectionStrings.config
+/Wipfli/Global.asax
+/Wipfli/Web.config
+/Wipfli/Web.Debug.config
+/Wipfli/Web.Release.config
+Thumbs.db
+.DS_Store
+\.vs/Wipfli/v14/\.suo
+/packages
+/.vs
+Wipfli/Wipfli.csproj.user
+*.user
+*/node_modules
+node_modules/
+*/package-lock.json
+*.local.config
+Wipfli/assets/css/main.css
+Wipfli/assets/css/main.css.map
+/Wipfli/assets/Frontend/prototype/dist/assets/css/app.css
+/Wipfli/assets/Frontend/prototype/dist/assets/css/app.css.map
+/Wipfli/assets/css/hewins.css
+/Wipfli/assets/css/hewins.css.map
+/Wipfli/Digital/Frontend/node_modules
+/Wipfli/Digital/Frontend/node_modules/*
+/Wipfli/Digital/Frontend/prototype/dist/assets/css/app.css
+/Wipfli/Digital/Frontend/prototype/dist/assets/css/app.css.map
+/Wipfli/Digital/Frontend/prototype/dist/assets/js/fed-app-bundle.js
+/Wipfli/Digital/Frontend/npm-shrinkwrap.json
+/Wipfli/App_Config/ConnectionStrings.Docker.config
+/docker/license/license.xml
+/docker/data/mssql/*
+/docker/data/solr/*
+/docker/data/cm/website/*
+/docker/data/cm/logs/*
+/docker/data/identity/*
+/docker/data/xconnect/*
+/docker/dbs/*.bak
+/docker/.env
+/tools/*
+!/tools/packages.config
+/website
+/TDS Resource
+/temp
+/.env
+!modules/**/bin
+
+
+
+# may contain OAuth secrets, do not commit
+.sitecore/user.json
+
+# package reference cache
+.sitecore/package-cache
+
+# Ephemeral index caches used by serialization, do not commit
+.scindex
+
+# Don't commit packages
+*.itempackage
+*.sicpackage

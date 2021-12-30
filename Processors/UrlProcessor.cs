@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Net;
 using System.Web;
 using Sitecore.Configuration;
@@ -64,9 +65,26 @@ namespace ContainerWarmer.Processors
                 }
                 catch (WebException wex)
                 {
-                    Log.Error($"Warmup: General Web Exception: {wex.Message}", wex, this);
-                    args.IsFailed = true;
-                    args.Messages.Add($"Failed. Url Warmup: '{url}'");
+                    var errorResponse = wex.Response as HttpWebResponse;
+
+                    if (errorResponse.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        Log.Error($"Warmup: General Web Exception: {wex.Message}", wex, this);
+
+                        args.Messages.Add($"Skipped (404). Url Warmup: '{url}'");
+
+                        if (_allowCaching)
+                        {
+                            AddToCache(fullUrl);
+                        }
+                    }
+                    else
+                    {
+                        Log.Error($"Warmup: General Web Exception: {wex.Message}", wex, this);
+                        args.IsFailed = true;
+                        args.Messages.Add($"Failed. Url Warmup: '{url}'");
+                    }
+                   
                 }
                 catch (Exception ex)
                 {

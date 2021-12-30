@@ -44,19 +44,19 @@ namespace ContainerWarmer.Processors
 
                 if (_allowCaching && IsCached(fullUrl))
                 {
-                    Log.Info($"Warmup: Cached Url '{url}'", this);
-                    args.Messages.Add($"Success. Url Warmup: '{url}' (from cache)");
+                    Log.Info($"Warmup: Cached Url '{fullUrl}'", this);
+                    args.Messages.Add($"Success. Url Warmup: '{fullUrl}' (from cache)");
                     continue;
                 }
 
                 try
                 {
-                    Log.Info($"Warmup: Loading Url '{url}'", this);
+                    Log.Info($"Warmup: Loading Url '{fullUrl}'", this);
                     using (var client = new WebClient())
                     {
                         client.DownloadString(fullUrl);
                     }
-                    args.Messages.Add($"Success. Url Warmup: '{url}'");
+                    args.Messages.Add($"Success. Url Warmup: '{fullUrl}'");
 
                     if (_allowCaching)
                     {
@@ -69,9 +69,9 @@ namespace ContainerWarmer.Processors
 
                     if (errorResponse.StatusCode == HttpStatusCode.NotFound)
                     {
-                        Log.Error($"Warmup: General Web Exception: {wex.Message}", wex, this);
+                        Log.Error($"Warmup: 404. General Web Exception: {wex.Message}", wex, this);
 
-                        args.Messages.Add($"Skipped (404). Url Warmup: '{url}'");
+                        args.Messages.Add($"Skipped (404). Url Warmup: '{fullUrl}'");
 
                         if (_allowCaching)
                         {
@@ -82,15 +82,15 @@ namespace ContainerWarmer.Processors
                     {
                         Log.Error($"Warmup: General Web Exception: {wex.Message}", wex, this);
                         args.IsFailed = true;
-                        args.Messages.Add($"Failed. Url Warmup: '{url}'");
+                        args.Messages.Add($"Failed. Url Warmup: '{fullUrl}'");
                     }
                    
                 }
                 catch (Exception ex)
                 {
-                    Log.Error($"Warmup: Unhandled Error fetching page: {url}", ex, this);
+                    Log.Error($"Warmup: Unhandled Error fetching page: {fullUrl}", ex, this);
                     args.IsFailed = true;
-                    args.Messages.Add($"Failed. Url Warmup: '{url}'");
+                    args.Messages.Add($"Failed. Url Warmup: '{fullUrl}'");
                 }
             }
         }

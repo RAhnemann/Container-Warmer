@@ -18,3 +18,6 @@ The UrlProcessor takes in two optional parameters:  allowCaching and baseUrl
 - **allowCaching** - This parameter will cache the request in case there is a failure down the line, which would cause it to re-invoke the pipeline.
 - **baseUrl** - This parameter sets the base url for the processor.  If not set, the processor will use the Setting above.  This setting comes into play more with multi-site implementations and should be used sparingly to avoid confusion.
 
+## Image:
+
+You can retreive this image from Docker Hub: [https://hub.docker.com/r/rahnemann/container-warmer/tags](https://hub.docker.com/r/rahnemann/container-warmer/tags])

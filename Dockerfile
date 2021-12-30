@@ -14,4 +14,6 @@ RUN msbuild ContainerWarmer.sln --% /p:DeployOnBuild=true;PublishProfile=Website
 
 FROM mcr.microsoft.com/windows/nanoserver:1809
 
-COPY --from=build ./website ./website
+COPY --from=build ./website/bin/ContainerWarmer.dll ./website/bin/
+
+COPY --from=build ./website/App_Config ./website/App_Config

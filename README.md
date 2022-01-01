@@ -1,7 +1,7 @@
 ## Purpose:
 
 Container Warmer allows for the execution of a custom pipeline that can be patched with processors and invoked during the "ready" check portion of the k8s initialization process.  This, in the basic model here, translates into HTTP Requests to specific pages to pre-load the HTML cache.
-There are a few aspects to the solution, some of which are not in this repository. For a full writeup, see the corresponding blog entry at [Rock, Paper Sitecore]([http://rockpapersitecore.com/2021/12/warming-your-containers-in-k8s]).
+There are a few aspects to the solution, some of which are not in this repository. For a full writeup, see the corresponding blog entry at [Rock, Paper Sitecore][http://rockpapersitecore.com/2022/1/warming-your-containers-in-k8s).
 
 This solution does three things:
 1. Register the Web API Routes in the initialize pipeline
@@ -20,4 +20,4 @@ The UrlProcessor takes in two optional parameters:  allowCaching and baseUrl
 
 ## Image:
 
-You can retreive this image from Docker Hub: [https://hub.docker.com/r/rahnemann/container-warmer/tags](https://hub.docker.com/r/rahnemann/container-warmer/tags])
+You can retreive this image from Docker Hub: [https://hub.docker.com/r/rahnemann/container-warmer/tags](https://hub.docker.com/r/rahnemann/container-warmer/tags)

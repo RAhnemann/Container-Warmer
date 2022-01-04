@@ -54,8 +54,10 @@ namespace ContainerWarmer.Processors
                     Log.Info($"Warmup: Loading Url '{fullUrl}'", this);
                     using (var client = new WebClient())
                     {
+                        client.Headers.Add(HttpRequestHeader.UserAgent, "container-warmer");
                         client.DownloadString(fullUrl);
                     }
+
                     args.Messages.Add($"Success. Url Warmup: '{fullUrl}'");
 
                     if (_allowCaching)

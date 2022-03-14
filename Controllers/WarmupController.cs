@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -14,34 +15,33 @@ namespace ContainerWarmer.Controllers
         public HttpResponseMessage Warm(bool verbose = false)
         {
             var args = new WarmupArgs();
+            try
+            {
+                CorePipeline.Run("warmup", args);
+            }
+            catch (Exception e)
+            {
+                args.IsFailed = true;
+                args.Messages.Add("Error Running Pipeline: " + e.Message);
+            }
 
-            CorePipeline.Run("warmup", args);
+            HttpResponseMessage msg;
 
             if (args.IsFailed)
             {
-                var msg = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+                msg = verbose ? Request.CreateResponse(HttpStatusCode.InternalServerError, args.Messages) : Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Error in Warmup");
+
                 msg.Headers.Pragma.ParseAdd("no-cache");
                 msg.Content.Headers.TryAddWithoutValidation("Expires", "0");
-
-                if (verbose)
-                {
-                    msg.Content = new StringContent(JsonConvert.SerializeObject(args.Messages), Encoding.UTF8, "text/plain");
-                    msg.Content.Headers.TryAddWithoutValidation("Expires", "0");
-                }
 
                 return msg;
             }
             else
             {
-                var msg = new HttpResponseMessage(HttpStatusCode.OK);
+                msg = verbose ? Request.CreateResponse(HttpStatusCode.OK, args.Messages) : Request.CreateResponse(HttpStatusCode.OK, "Healthy");
+
                 msg.Headers.Pragma.ParseAdd("no-cache");
-
-
-                if (verbose)
-                {
-                    msg.Content = new StringContent(JsonConvert.SerializeObject(args.Messages), Encoding.UTF8, "text/plain");
-                    msg.Content.Headers.TryAddWithoutValidation("Expires", "0");
-                }
+                msg.Content.Headers.TryAddWithoutValidation("Expires", "0");
 
                 return msg;
             }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Net;
 using System.Web;
 using Sitecore.Configuration;
@@ -36,70 +37,85 @@ namespace ContainerWarmer.Processors
         {
             if (args.IsFailed)
                 return;
-
-            foreach (var url in _urls)
+            try
             {
-                var fullUrl = $"{_baseUrl}/{url}";
-
-
-                if (_allowCaching && IsCached(fullUrl))
+                foreach (var url in _urls)
                 {
-                    Log.Info($"Warmup: Cached Url '{fullUrl}'", this);
-                    args.Messages.Add($"Success. Url Warmup: '{fullUrl}' (from cache)");
-                    continue;
-                }
+                    var fullUrl = $"{_baseUrl}{url}";
 
-                try
-                {
-                    Log.Info($"Warmup: Loading Url '{fullUrl}'", this);
-                    using (var client = new WebClient())
+                    try
                     {
-                        client.Headers.Add(HttpRequestHeader.UserAgent, "container-warmer");
-                        client.DownloadString(fullUrl);
-                    }
+                        if (_allowCaching && IsCached(fullUrl))
+                        {
+                            Log.Info($"Warmup: Cached Url '{fullUrl}'", this);
+                            args.Messages.Add($"Success. Url Warmup: '{fullUrl}' (from cache)");
+                            continue;
+                        }
 
-                    args.Messages.Add($"Success. Url Warmup: '{fullUrl}'");
+                        Log.Info($"Warmup: Loading Url '{fullUrl}'", this);
+                        using (var client = new WebClient())
+                        {
+                            client.Headers.Add(HttpRequestHeader.UserAgent, "container-warmer");
+                            client.DownloadString(fullUrl);
+                        }
 
-                    if (_allowCaching)
-                    {
-                        AddToCache(fullUrl);
-                    }
-                }
-                catch (WebException wex)
-                {
-                    var errorResponse = wex.Response as HttpWebResponse;
-
-                    if (errorResponse.StatusCode == HttpStatusCode.NotFound)
-                    {
-                        Log.Error($"Warmup: 404. General Web Exception: {wex.Message}", wex, this);
-
-                        args.Messages.Add($"Skipped (404). Url Warmup: '{fullUrl}'");
+                        args.Messages.Add($"Success. Url Warmup: '{fullUrl}'");
 
                         if (_allowCaching)
                         {
                             AddToCache(fullUrl);
                         }
                     }
-                    else
+                    catch (WebException wex)
                     {
-                        Log.Error($"Warmup: General Web Exception: {wex.Message}", wex, this);
-                        args.IsFailed = true;
-                        args.Messages.Add($"Failed. Url Warmup: '{fullUrl}'");
+                        if (wex.Status == WebExceptionStatus.ProtocolError)
+                        {
+                            if (wex.Response is HttpWebResponse errorResponse &&
+                                errorResponse.StatusCode == HttpStatusCode.NotFound)
+                            {
+                                Log.Error($"Warmup: 404. General Web Exception: {wex.Message}", wex, this);
+
+                                args.Messages.Add($"Skipped (404). Url Warmup: '{fullUrl}'");
+
+                                if (_allowCaching)
+                                {
+                                    AddToCache(fullUrl);
+                                }
+                            }
+                            else
+                            {
+                                Log.Error($"Warmup: Non 404 response. {wex.Message}", wex, this);
+                            }
+                        }
+                        else
+                        {
+                            Log.Error($"Warmup: General Web Exception: {wex.Message}", wex, this);
+                            args.IsFailed = true;
+                            args.Messages.Add($"Failed. Url Warmup: '{fullUrl}': {wex.Message}");
+                        }
+
                     }
-                   
+                    catch (Exception ex)
+                    {
+                        Log.Error($"Warmup: Unhandled Error fetching page: {fullUrl}", ex, this);
+                        args.IsFailed = true;
+                        args.Messages.Add($"Failed:General. Url Warmup: '{fullUrl}'");
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Log.Error($"Warmup: Unhandled Error fetching page: {fullUrl}", ex, this);
-                    args.IsFailed = true;
-                    args.Messages.Add($"Failed. Url Warmup: '{fullUrl}'");
-                }
+            }
+            catch (Exception ex)
+            {
+                args.IsFailed = true;
+                Log.Error("Warmup: FATAL Unhandled Error in UrlProcessor", ex, this);
             }
         }
 
         public bool IsCached(string url)
         {
-            return HttpContext.Current.Application[$"Warmup_{url}"] != null;
+            if (HttpContext.Current.Application.AllKeys.Contains($"Warmup_{url}"))
+                return HttpContext.Current.Application[$"Warmup_{url}"] != null;
+            
+            return false;
         }
 
         public void AddToCache(string url)
